@@ -56,6 +56,7 @@ export class LockCodeManagerDashboardStrategy extends ReactiveElement {
                     show_lock_cards: showLockCardsInViews,
                     show_lock_status: config.show_lock_status,
                     show_lock_sync: config.show_lock_sync,
+                    sort_users: config.sort_users,
                     type: 'custom:lock-code-manager',
                     use_slot_cards: config.use_slot_cards
                 },

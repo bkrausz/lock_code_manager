@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { generateView } from './generate-view';
+import { generateView, sortSlots } from './generate-view';
 import {
     ACTIVE_KEY,
     CODE_EVENT_KEY,
@@ -687,6 +687,38 @@ function strategySections(
     );
 }
 
+describe('sortSlots', () => {
+    const named = (name: string | null) => {
+        return { condition: null, name };
+    };
+
+    it('keeps slot order by default, numerically', () => {
+        expect(sortSlots({ 10: named('Ann'), 2: named('Zed'), 7: named('Bo') }, 'slot')).toEqual([
+            2, 7, 10
+        ]);
+    });
+
+    it('sorts by name ignoring case', () => {
+        expect(
+            sortSlots({ 6: named('yuki'), 7: named("Miller's Menagerie"), 8: named('Ann') }, 'name')
+        ).toEqual([8, 7, 6]);
+    });
+
+    it('reads digits in names as numbers', () => {
+        expect(sortSlots({ 1: named('Room 10'), 2: named('Room 2') }, 'name')).toEqual([2, 1]);
+    });
+
+    it('puts unnamed users last, in slot order', () => {
+        expect(
+            sortSlots({ 1: null, 2: named('Zed'), 3: named('  '), 4: named('Ann') }, 'name')
+        ).toEqual([4, 2, 1, 3]);
+    });
+
+    it('breaks ties between equal names by slot', () => {
+        expect(sortSlots({ 5: named('Guest'), 3: named('guest') }, 'name')).toEqual([3, 5]);
+    });
+});
+
 describe('generateView', () => {
     const testConfigEntry: ConfigEntryJSONFragment = {
         disabled_by: '',
@@ -806,6 +838,39 @@ describe('generateView', () => {
                 badge.type === 'template'
         );
         expect(templateBadges).toHaveLength(0);
+    });
+
+    it('orders user sections by name when sortUsers is name', async () => {
+        const configEntryData: LockCodeManagerConfigEntryDataResponse = {
+            config_entry: testConfigEntry,
+            entities: [],
+            locks: [{ entity_id: 'lock.front', name: 'Front Lock' }],
+            slots: {
+                1: { condition: null, name: 'Yuki' },
+                2: { condition: null, name: "Miller's Menagerie" }
+            }
+        };
+
+        const hass = createMockHass({
+            callWS: (msg) =>
+                msg.type === 'lock_code_manager/get_config_entry_data' ? configEntryData : []
+        });
+
+        const options = {
+            showCodeSensors: false,
+            showLockSync: false,
+            showLockCards: false,
+            codeDisplay: 'unmasked' as const,
+            useSlotCards: true
+        };
+        const slotOrder = async (sortUsers?: 'name' | 'slot') =>
+            strategySections(
+                (await generateView(hass, testConfigEntry, { ...options, sortUsers })).sections,
+                'custom:lock-code-manager-slot'
+            ).map((section) => (section.strategy as { slot: number }).slot);
+
+        expect(await slotOrder()).toEqual([1, 2]);
+        expect(await slotOrder('name')).toEqual([2, 1]);
     });
 
     it('generates one card per slot', async () => {

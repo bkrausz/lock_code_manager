@@ -1,4 +1,4 @@
-import { CodeDisplayMode } from './types';
+import { CodeDisplayMode, UserSortOrder } from './types';
 
 export const CODE_SENSOR_KEY = 'code';
 export const CODE_EVENT_KEY = 'credential_used';
@@ -58,6 +58,7 @@ export const DEFAULT_SHOW_LOCK_STATUS = true;
 export const DEFAULT_SHOW_LOCK_SYNC = true;
 export const DEFAULT_USE_SLOT_CARDS = true;
 export const DEFAULT_SHOW_ALL_LOCK_CARDS_VIEW = true;
+export const DEFAULT_SORT_USERS: UserSortOrder = 'slot';
 
 // Legacy defaults (deprecated, kept for backwards compatibility)
 /** @deprecated Use DEFAULT_SHOW_ALL_LOCK_CARDS_VIEW */

@@ -36,6 +36,7 @@ const DEFAULT_OPTIONS: GenerateViewOptions = {
     useSlotCards: true,
     showConditions: true,
     showLockStatus: true,
+    sortUsers: 'slot',
     collapsedSections: undefined
 };
 
@@ -131,6 +132,7 @@ describe('LockCodeManagerViewStrategy', () => {
             ['show_conditions', { show_conditions: false }, { showConditions: false }],
             ['show_lock_status', { show_lock_status: false }, { showLockStatus: false }],
             ['code_display', { code_display: 'unmasked' }, { codeDisplay: 'unmasked' }],
+            ['sort_users', { sort_users: 'name' }, { sortUsers: 'name' }],
             [
                 'collapsed_sections',
                 {

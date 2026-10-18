@@ -91,6 +91,7 @@ describe('LockCodeManagerDashboardStrategy', () => {
                     show_lock_cards: true,
                     show_lock_status: undefined,
                     show_lock_sync: undefined,
+                    sort_users: undefined,
                     type: 'custom:lock-code-manager',
                     use_slot_cards: undefined
                 },
@@ -107,6 +108,7 @@ describe('LockCodeManagerDashboardStrategy', () => {
                     show_lock_cards: true,
                     show_lock_status: undefined,
                     show_lock_sync: undefined,
+                    sort_users: undefined,
                     type: 'custom:lock-code-manager',
                     use_slot_cards: undefined
                 },
@@ -360,6 +362,21 @@ describe('LockCodeManagerDashboardStrategy', () => {
 
             const view = result.views[0] as { strategy: { use_slot_cards: boolean } };
             expect(view.strategy.use_slot_cards).toBe(false);
+        });
+
+        it('passes sort_users config to view strategies', async () => {
+            const hass = createDashboardMockHass({
+                configEntries: [{ entry_id: 'entry1', title: 'Lock' }],
+                locksPerEntry: { entry1: [] }
+            });
+
+            const result = await LockCodeManagerDashboardStrategy.generate(
+                testConfig({ sort_users: 'name', show_all_lock_cards_view: false }),
+                hass
+            );
+
+            const view = result.views[0] as { strategy: { sort_users: string } };
+            expect(view.strategy.sort_users).toBe('name');
         });
 
         describe('deprecated show_all_codes_for_locks fallback', () => {

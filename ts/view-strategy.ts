@@ -8,6 +8,7 @@ import {
     DEFAULT_SHOW_LOCK_CARDS,
     DEFAULT_SHOW_LOCK_STATUS,
     DEFAULT_SHOW_LOCK_SYNC,
+    DEFAULT_SORT_USERS,
     DEFAULT_USE_SLOT_CARDS
 } from './const';
 import { generateView } from './generate-view';
@@ -68,6 +69,7 @@ export class LockCodeManagerViewStrategy extends ReactiveElement {
                 showLockCards,
                 showLockStatus: config.show_lock_status ?? DEFAULT_SHOW_LOCK_STATUS,
                 showLockSync,
+                sortUsers: config.sort_users ?? DEFAULT_SORT_USERS,
                 useSlotCards: config.use_slot_cards ?? DEFAULT_USE_SLOT_CARDS
             });
         } catch {

@@ -4,6 +4,7 @@ import {
     CODE_SENSOR_KEY,
     CONDITION_KEYS,
     CREDENTIAL_LABELS,
+    DEFAULT_SORT_USERS,
     DIVIDER_CARD,
     IN_SYNC_KEY,
     KEY_ORDER,
@@ -25,9 +26,44 @@ import {
     GenerateViewOptions,
     LockCodeManagerConfigEntryDataResponse,
     LockCodeManagerEntityEntry,
-    SlotMapping
+    SlotInfo,
+    SlotMapping,
+    UserSortOrder
 } from './types';
 import { capitalize } from './util';
+
+/**
+ * The slot numbers in the order their users should appear.
+ *
+ * By slot, users keep the order they were added in. By name, they sort
+ * alphabetically, ignoring case and reading digits as numbers, so a guest
+ * named "Room 10" follows "Room 2". A user with no name has nothing to sort
+ * by and goes last; ties keep slot order, so the result never shuffles
+ * between renders.
+ */
+export function sortSlots(
+    slots: { [key: number]: SlotInfo | null },
+    sortUsers: UserSortOrder
+): number[] {
+    const slotNums = Object.keys(slots)
+        .map((slotNum) => parseInt(slotNum, 10))
+        .sort((a, b) => a - b);
+    if (sortUsers !== 'name') {
+        return slotNums;
+    }
+    const nameOf = (slotNum: number): string => slots[slotNum]?.name?.trim() ?? '';
+    return slotNums.sort((a, b) => {
+        const nameA = nameOf(a);
+        const nameB = nameOf(b);
+        if (!nameA || !nameB) {
+            // Unnamed users last, still in slot order among themselves.
+            return Number(!nameA) - Number(!nameB) || a - b;
+        }
+        return (
+            nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' }) || a - b
+        );
+    });
+}
 
 export async function generateView(
     hass: HomeAssistant,
@@ -43,6 +79,7 @@ export async function generateView(
         showLockCards: show_lock_cards,
         showLockStatus: show_lock_status = true,
         showLockSync: show_lock_sync,
+        sortUsers: sort_users = DEFAULT_SORT_USERS,
         useSlotCards: use_slot_cards
     } = options;
     const configEntryData = await hass.callWS<LockCodeManagerConfigEntryDataResponse>({
@@ -50,7 +87,7 @@ export async function generateView(
         type: 'lock_code_manager/get_config_entry_data'
     });
 
-    const slots = Object.keys(configEntryData.slots).map((slotNum) => parseInt(slotNum, 10));
+    const slots = sortSlots(configEntryData.slots, sort_users);
 
     // One entity per slot, to address its card by. Any of the slot's entities
     // would do -- the unique ID carries the slot number either way -- so this

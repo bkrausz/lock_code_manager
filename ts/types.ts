@@ -81,9 +81,17 @@ export interface LockCodeManagerStrategyConfig {
     show_lock_status?: boolean;
     /** Show sync status per lock in lock status */
     show_lock_sync?: boolean;
+    /** Order of the user cards: by slot number (default) or by user name */
+    sort_users?: UserSortOrder;
     /** Use the new streamlined slot cards instead of entities cards (default: true) */
     use_slot_cards?: boolean;
 }
+
+/**
+ * How a view orders its users. `slot` keeps the slot order, which is the
+ * order users were added in; `name` sorts them alphabetically.
+ */
+export type UserSortOrder = 'name' | 'slot';
 
 export interface LockCodeManagerDashboardStrategyConfig extends LockCodeManagerStrategyConfig {
     /** Condition helper entity IDs per config entry and slot */
@@ -426,5 +434,6 @@ export interface GenerateViewOptions {
     showLockCards: boolean;
     showLockStatus?: boolean;
     showLockSync: boolean;
+    sortUsers?: UserSortOrder;
     useSlotCards: boolean;
 }
